@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">尋人</string>
+    <string name="action_settings">設定</string>
+
+    <string name="find_location">尋找</string>
+    <string name="msg_find_location_empty">請輸入 電話號碼 及 口令.</string>
+    <string name="msg_find_location_guide">&lt;&lt; 按 [尋找] 查詢位置 &gt;&gt;</string>
+    <string name="msg_my_location_wait">&lt;&lt; 等待我的位置 &gt;&gt;</string>
+
+    <string name="msg_input_error">發生錯誤: 輸入資料不正確.</string>
+    <string name="msg_sms_sent">已發出查詢位置的短訊</string>
+    <string name="msg_sms_sent_err_generic">發生錯誤: 一般故障.</string>
+    <string name="msg_sms_sent_err_no_service">發生錯誤: 沒有短訊服務.</string>
+    <string name="msg_sms_sent_err_null_pdu">發生錯誤: Null PDU.</string>
+    <string name="msg_sms_sent_err_radio_off">發生錯誤: Radio off.</string>
+
+    <string name="msg_sms_returned">收到回覆短訊</string>
+    <string name="msg_sms_returned_err">發生錯誤: 在短訊中讀取位置失敗</string>
+
+
+</resources>

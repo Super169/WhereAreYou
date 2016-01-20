@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Where are you?</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="find_location">Find</string>
+    <string name="msg_find_location_empty">Please enter phone and keyword.</string>
+    <string name="msg_find_location_guide">&lt;&lt; press [Find] to get location &gt;&gt;</string>
+    <string name="msg_my_location_wait">&lt;&lt; waiting for my location &gt;&gt;</string>
+
+    <string name="shared_pref_key" translatable="false">ord.super169.shares</string>
+    <string name="pref_key_phone" translatable="false">phone</string>
+    <string name="pref_key_keyword" translatable="false">keyword</string>
+    <string name="pref_keyword_default" translatable="false">location</string>
+
+
+<!--
+    mFindLocationView.setText("<< press [Find] to get location >>");
+         mMyLocationView.setText("<< waiting for my location >>");
+-->
+
+    <string name="msg_input_error">Error: invalid input.</string>
+    <string name="msg_sms_sent">SMS sent to request for location.</string>
+    <string name="msg_sms_sent_err_generic">Error: Generic Failure.</string>
+    <string name="msg_sms_sent_err_no_service">Error: No Service.</string>
+    <string name="msg_sms_sent_err_null_pdu">Error: Null PDU.</string>
+    <string name="msg_sms_sent_err_radio_off">Error: Radio off.</string>
+
+    <string name="msg_sms_returned">SMS Returned</string>
+    <string name="msg_sms_returned_err">Error: Fail to get location from SMS</string>
+
+
+
+</resources>
