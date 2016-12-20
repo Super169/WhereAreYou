@@ -5,6 +5,11 @@
     <string name="action_settings">Settings</string>
 
     <string name="find_location">Find</string>
+    <string name="get_best_location">Best</string>
+    <string name="get_fused_location">Fused</string>
+    <string name="get_gps_location">GPS</string>
+    <string name="get_network_location">Network</string>
+
     <string name="msg_find_location_empty">Please enter phone and keyword.</string>
     <string name="msg_find_location_guide">&lt;&lt; press [Find] to get location &gt;&gt;</string>
     <string name="msg_my_location_wait">&lt;&lt; waiting for my location &gt;&gt;</string>

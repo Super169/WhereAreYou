@@ -5,6 +5,12 @@
     <string name="action_settings">設定</string>
 
     <string name="find_location">尋找</string>
+    <string name="get_best_location">最佳定位</string>
+    <string name="get_fused_location">融合位置</string>
+    <string name="get_gps_location">衛星定位</string>
+    <string name="get_network_location">網絡定位</string>
+
+
     <string name="msg_find_location_empty">請輸入 電話號碼 及 口令.</string>
     <string name="msg_find_location_guide">&lt;&lt; 按 [尋找] 查詢位置 &gt;&gt;</string>
     <string name="msg_my_location_wait">&lt;&lt; 等待我的位置 &gt;&gt;</string>
