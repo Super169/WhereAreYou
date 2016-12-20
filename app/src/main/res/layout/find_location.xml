@@ -64,6 +64,38 @@
         android:layout_height="20dp"
         android:textColor="@android:color/holo_blue_light"
         android:text="my location" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left">
+        <Button
+            android:id="@+id/get_provider_fused"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="40dp"
+            android:onClick="goFindFused"
+            android:textColor="@android:color/holo_orange_dark"
+            android:text="@string/get_fused_location" />
+        <Button
+            android:id="@+id/get_provider_gps"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="40dp"
+            android:onClick="goFindGps"
+            android:textColor="@android:color/holo_green_dark"
+            android:text="@string/get_gps_location" />
+        <Button
+            android:id="@+id/get_provider_nextwork"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="40dp"
+            android:onClick="goFindNetwork"
+            android:textColor="@android:color/holo_red_dark"
+            android:text="@string/get_network_location" />
+    </LinearLayout>
+
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
@@ -80,7 +112,7 @@
             android:padding="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="goFindLocation"
+            android:onClick="goFindBest"
             android:text="@string/find_location"
             android:layout_alignParentEnd="true"
             android:layout_marginTop="54dp" />
