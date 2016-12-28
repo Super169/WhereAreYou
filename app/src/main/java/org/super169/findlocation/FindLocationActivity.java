@@ -20,6 +20,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -27,9 +29,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
@@ -42,7 +47,6 @@ import android.widget.Toast;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 /**
  * This demo shows how GMS Location can be used to check for changes to the users location.  The
@@ -68,55 +72,14 @@ public class FindLocationActivity extends FragmentActivity
     private Marker mMarker = null;
     private Circle mCircle = null;
 
-    private static DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    // It is intends to use fixed date format
+    @SuppressLint("SimpleDateFormat")
+    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-
-//    return String.format(formatter, location.getProvider(), format.format(new Date(location.getTime())), location.getLatitude(), location.getLongitude(), location.getAccuracy(), location.getSpeed());
-
-    private class LocationData {
-        private boolean mReady = false;
-        private String mProvider, mTime;
-        private double mLatitude, mLongitude, mAccuracy, mSpeed;
-
-        public void reset() {
-            mReady = false;
-        }
-
-        public boolean isReady() {
-            return mReady;
-        }
-
-        public void init(String _provider, String _time, double _latitude, double _longitude, double _accuracy, double _speed) {
-            mReady = true;
-            mProvider = _provider;
-            mTime = _time;
-            mLatitude = _latitude;
-            mLongitude = _longitude;
-            mAccuracy = _accuracy;
-            mSpeed = _speed;
-        }
-
-        public String getProvider() { return (mReady ? mProvider : null); }
-        public String getTime() { return (mReady ? mTime : null); }
-        public double getLatitude() { return (mReady ? mLatitude : 0); }
-        public double getLngitude() { return (mReady ? mLongitude : 0); }
-        public double getAccuracy() { return (mReady ? mAccuracy : 0); }
-        public double getSpeed() { return (mReady ? mSpeed : 0); }
-    }
-
-    private static LocationData lastLocation[] = new LocationData[4];
-    public static final int PROVIDER_UNKNOWN = 0;
-    public static final int PROVIDER_FUSED = 1;
-    public static final int PROVIDER_GPS = 2;
-    public static final int PROVIDER_NETWORK = 3;
-
-    public static final String ACTION_SMS_SENT = "org.super169.mylocation.SMS_SENT_ACTION";
-    public static final String ACTION_SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
+    private static final String ACTION_SMS_SENT = "org.super169.mylocation.SMS_SENT_ACTION";
+    private static final String ACTION_SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
     private static BroadcastReceiver mSendSMSReceiver;
     private static BroadcastReceiver mReceiveSMSReceiver;
-
-    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private final String msgFormat = "%s > (%3.6f, %3.6f) %.2fm";
 
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
@@ -133,8 +96,8 @@ public class FindLocationActivity extends FragmentActivity
         final TextView appVersion = (TextView) findViewById(R.id.app_version);
         appVersion.setText(getString(R.string.app_name) + " (" + BuildConfig.VERSION_NAME + ")");
 
-        String sPhone = getPrefData(this, getString(R.string.pref_key_phone) );
-        String sKeyword = getPrefData(this, getString(R.string.pref_key_keyword), getString(R.string.pref_keyword_default) );
+        String sPhone = getPrefData(this, getString(R.string.pref_key_phone));
+        String sKeyword = getPrefData(this, getString(R.string.pref_key_keyword), getString(R.string.pref_keyword_default));
 
         mFindLocationView = (TextView) findViewById(R.id.find_location_text);
         mMyLocationView = (TextView) findViewById(R.id.my_location_text);
@@ -180,13 +143,11 @@ public class FindLocationActivity extends FragmentActivity
             public void onReceive(Context context, Intent intent) {
                 // mFindLocationView.setText("SMS Received");
 
-                Bundle extras = intent.getExtras();
+                // Bundle extras = intent.getExtras();
                 String targetPhone = "+852" + mPhone.getText().toString().trim();
-                String sDisplay;
 
                 SmsMessage[] msgs = android.provider.Telephony.Sms.Intents.getMessagesFromIntent(intent);
-                for (int i = 0; i < msgs.length; i++) {
-                    SmsMessage message = msgs[i];
+                for (SmsMessage message : msgs) {
                     String fromAddress = message.getOriginatingAddress().trim();
 
                     if (fromAddress.equals(targetPhone)) {
@@ -194,7 +155,7 @@ public class FindLocationActivity extends FragmentActivity
                         abortBroadcast();
                         showFindLocationMessage(R.string.msg_sms_returned, true);
                         try {
-                            String msgBody = message.getMessageBody().toString();
+                            String msgBody = message.getMessageBody();
                             showFindLocation(msgBody);
 
                         } catch (Exception e) {
@@ -238,6 +199,10 @@ public class FindLocationActivity extends FragmentActivity
     public void onMapReady(GoogleMap map) {
         mMap = map;
         if (mMap != null) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
             mMap.setMyLocationEnabled(true);
             mMap.setOnMyLocationButtonClickListener(this);
             mMap.getUiSettings().setZoomControlsEnabled(false);
@@ -261,6 +226,7 @@ public class FindLocationActivity extends FragmentActivity
     public void onLocationChanged(Location location) {
         // mMyLocationView.setText("Location = " + location);
         // String sDisplay = String.format(msgFormat, dateFormat.format(new Date(location.getTime())), location.getLongitude(), location.getLatitude(), location.getSpeed());
+        @SuppressLint("DefaultLocale")
         String sDisplay = String.format("%s > %.2fm (%s)", dateFormat.format(new Date(location.getTime())), location.getSpeed(), location.getProvider());
         mMyLocationView.setText(sDisplay);
     }
@@ -270,6 +236,9 @@ public class FindLocationActivity extends FragmentActivity
      */
     @Override
     public void onConnected(Bundle connectionHint) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 mGoogleApiClient,
                 REQUEST,
@@ -288,7 +257,7 @@ public class FindLocationActivity extends FragmentActivity
      * Implementation of {@link OnConnectionFailedListener}.
      */
     @Override
-    public void onConnectionFailed(ConnectionResult result) {
+    public void onConnectionFailed(@NonNull ConnectionResult result) {
         // Do nothing
     }
 
@@ -305,7 +274,7 @@ public class FindLocationActivity extends FragmentActivity
                 getString(R.string.shared_pref_key), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString(key, value);
-        editor.commit();
+        editor.apply();
     }
 
     private String getPrefData(Context context, String key) {
@@ -328,20 +297,28 @@ public class FindLocationActivity extends FragmentActivity
         }
     }
 
+    // Parameter View is required for onClick event
+    @SuppressWarnings("UnusedParameters")
     public void goFindFused(View view) {
-        goFindLocation(view, LocationProvider.Fused);
+        goFindLocation(LocationProvider.Fused);
     }
 
+    // Parameter View is required for onClick event
+    @SuppressWarnings("UnusedParameters")
     public void goFindGps(View view) {
-        goFindLocation(view, LocationProvider.GPS);
+        goFindLocation(LocationProvider.GPS);
     }
 
+    // Parameter View is required for onClick event
+    @SuppressWarnings("UnusedParameters")
     public void goFindNetwork(View view) {
-        goFindLocation(view, LocationProvider.Network);
+        goFindLocation(LocationProvider.Network);
     }
 
+    // Parameter View is required for onClick event
+    @SuppressWarnings("UnusedParameters")
     public void goFindBest(View view) {
-        goFindLocation(view, LocationProvider.Best);
+        goFindLocation(LocationProvider.Best);
     }
 
 
@@ -356,7 +333,8 @@ public class FindLocationActivity extends FragmentActivity
      * Button to get current Location. This demonstrates how to get the current Location as required
      * without needing to register a LocationListener.
      */
-    public void goFindLocation(View view, LocationProvider findType) {
+    // View is reserved for future use
+    private void goFindLocation(LocationProvider findType) {
         hideKeyboard();
         String sParm = "";
         String sMsg;
@@ -378,7 +356,8 @@ public class FindLocationActivity extends FragmentActivity
         try {
             sPhone = mPhone.getText().toString().trim();
             sKeyword = mKeyword.getText().toString().trim();
-            if ((sPhone != null) && (!sPhone.isEmpty()) && (sKeyword != null) && (!sKeyword.isEmpty())) {
+            //if ((sPhone != null) && (!sPhone.isEmpty()) && (sKeyword != null) && (!sKeyword.isEmpty())) {
+            if (!(sPhone.isEmpty() || sKeyword.isEmpty())) {
                 setPrefData(this, getString(R.string.pref_key_phone), sPhone);
                 setPrefData(this, getString(R.string.pref_key_keyword), sKeyword);
                 clearMaker();
@@ -399,9 +378,9 @@ public class FindLocationActivity extends FragmentActivity
 
     private void showFindLocation(String msgBody) {
         try {
-            String msgInfo[] = msgBody.split("\\#");
+            String msgInfo[] = msgBody.split("#");
             if (msgInfo.length > 2) {
-                String locationInfo[] = msgInfo[3].split("\\;");
+                String locationInfo[] = msgInfo[3].split(";");
                 Double l1 = Double.parseDouble(locationInfo[2]);
                 Double l2 = Double.parseDouble(locationInfo[3]);
                 Double accuracy = Double.parseDouble(locationInfo[4]);
@@ -417,13 +396,17 @@ public class FindLocationActivity extends FragmentActivity
                 //      32,1,1 - Orange
                 //      100,1,1 - Green
 
-                if (provider.equals("gps")) {
-                    mFillColor = Color.HSVToColor(0x3F, new float[] {100, 1, 1});
-                } else if (provider.equals("network")) {
-                    mFillColor = Color.HSVToColor(0x3F, new float[] {0, 1, 1});
-                } else {
-                    // default fused
-                    mFillColor = Color.HSVToColor(0x3F, new float[] {32, 1, 1});
+                switch (provider) {
+                    case "gps":
+                        mFillColor = Color.HSVToColor(0x3F, new float[]{100, 1, 1});
+                        break;
+                    case "network":
+                        mFillColor = Color.HSVToColor(0x3F, new float[]{0, 1, 1});
+                        break;
+                    default:
+                        // default fused
+                        mFillColor = Color.HSVToColor(0x3F, new float[]{32, 1, 1});
+                        break;
                 }
 
                 mCircle = mMap.addCircle( new CircleOptions().center(center).radius(accuracy).strokeWidth(5).fillColor(mFillColor));
@@ -431,56 +414,19 @@ public class FindLocationActivity extends FragmentActivity
                 CameraPosition cameraPosition = new CameraPosition.Builder(currentCameraPosition).target(center).zoom(15).build();
                 mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
+                @SuppressLint("DefaultLocale")
                 String sFindLocation = String.format("%s > %.2fm (%s)", locationInfo[1], speed, locationInfo[0]);
                 mFindLocationView.setText(sFindLocation);
 
             }
         } catch (Exception e) {
-
+            // nothing can do
         }
 
     }
 
-
-    // Color (Hub, Saturation, Brightness):
-    //      0,1,1 - Red
-    //      32,1,1 - Orange
-    //      100,1,1 - Green
-
-    private void readLocation(String locationString) {
-        String locationInfo[] = locationString.split("\\;");
-
-        // Location Data: provider, time, latitude, longitude, accuracy, speed
-        if (locationInfo.length >= 6) {
-
-            String provider = locationInfo[0].toLowerCase();
-
-            int providerId = PROVIDER_UNKNOWN;
-            if (provider.equals("fused")) providerId = PROVIDER_FUSED;
-            else if (provider.equals("gps")) providerId = PROVIDER_GPS;
-            else if (provider.equals("network")) providerId = PROVIDER_NETWORK;
-
-            try {
-
-                String gpsTime = locationInfo[1];
-                Double latitude = Double.parseDouble(locationInfo[2]);
-                Double longiture = Double.parseDouble(locationInfo[3]);
-                Double accuracy = Double.parseDouble(locationInfo[4]);
-                Double speed = Double.parseDouble(locationInfo[5]);
-
-                lastLocation[providerId].init(provider, gpsTime, latitude, longiture, accuracy, speed);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-
-        }
-
-
-    }
-
-
+    // Parameter prepared for generic function
+    @SuppressWarnings("SameParameterValue")
     private void showFindLocationMessage(int rsId, boolean showToast) {
         String sDisplay = getString(rsId);
         if (showToast) Toast.makeText(this, sDisplay, Toast.LENGTH_SHORT).show();
