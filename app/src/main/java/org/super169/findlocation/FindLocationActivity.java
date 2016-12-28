@@ -11,6 +11,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
@@ -54,7 +55,8 @@ public class FindLocationActivity extends FragmentActivity
         ConnectionCallbacks,
         OnConnectionFailedListener,
         LocationListener,
-        OnMyLocationButtonClickListener {
+        OnMyLocationButtonClickListener,
+        OnMapReadyCallback {
 
     private GoogleMap mMap;
 
@@ -228,15 +230,17 @@ public class FindLocationActivity extends FragmentActivity
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
-            // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
-                    .getMap();
-            // Check if we were successful in obtaining the map.
-            if (mMap != null) {
-                mMap.setMyLocationEnabled(true);
-                mMap.setOnMyLocationButtonClickListener(this);
-                mMap.getUiSettings().setZoomControlsEnabled(false);
-            }
+            ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+        }
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        mMap = map;
+        if (mMap != null) {
+            mMap.setMyLocationEnabled(true);
+            mMap.setOnMyLocationButtonClickListener(this);
+            mMap.getUiSettings().setZoomControlsEnabled(false);
         }
     }
 
