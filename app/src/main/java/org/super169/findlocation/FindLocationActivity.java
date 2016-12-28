@@ -181,12 +181,12 @@ public class FindLocationActivity extends FragmentActivity
                 // mFindLocationView.setText("SMS Received");
 
                 Bundle extras = intent.getExtras();
-                Object[] pdus = (Object[]) extras.get("pdus");
                 String targetPhone = "+852" + mPhone.getText().toString().trim();
                 String sDisplay;
 
-                for (int i = 0; i < pdus.length; i++) {
-                    SmsMessage message = SmsMessage.createFromPdu((byte[]) pdus[i]);
+                SmsMessage[] msgs = android.provider.Telephony.Sms.Intents.getMessagesFromIntent(intent);
+                for (int i = 0; i < msgs.length; i++) {
+                    SmsMessage message = msgs[i];
                     String fromAddress = message.getOriginatingAddress().trim();
 
                     if (fromAddress.equals(targetPhone)) {
