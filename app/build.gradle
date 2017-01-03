@@ -7,9 +7,9 @@ android {
     defaultConfig {
         applicationId "org.super169.findlocation"
         minSdkVersion 19
-        targetSdkVersion 23
+        targetSdkVersion 22
         versionCode 1
-        versionName "1.2.1"
+        versionName "1.2.2"
     }
     buildTypes {
         release {
