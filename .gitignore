@@ -89,3 +89,9 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Intellij project files
+*.iml
+*.ipr
+*.iws
+.idea/
