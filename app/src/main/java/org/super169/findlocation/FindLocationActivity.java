@@ -46,6 +46,7 @@ import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -80,6 +81,8 @@ public class FindLocationActivity extends FragmentActivity
     private static final String ACTION_SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
     private static BroadcastReceiver mSendSMSReceiver;
     private static BroadcastReceiver mReceiveSMSReceiver;
+
+    private static final DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
@@ -380,47 +383,56 @@ public class FindLocationActivity extends FragmentActivity
         try {
             String msgInfo[] = msgBody.split("#");
             if (msgInfo.length > 2) {
+                Double version = Double.parseDouble(msgInfo[2]);
                 String locationInfo[] = msgInfo[3].split(";");
-                Double l1 = Double.parseDouble(locationInfo[2]);
-                Double l2 = Double.parseDouble(locationInfo[3]);
-                Double accuracy = Double.parseDouble(locationInfo[4]);
-                Double speed = Double.parseDouble(locationInfo[5]);
-                LatLng center  = new LatLng(l1, l2);
-                clearMaker();
-                mMarker = mMap.addMarker( new MarkerOptions().position(center).draggable(false));
-                int mFillColor;
-                String provider = locationInfo[0].toLowerCase();
+                if (locationInfo.length > 5) {
+                    Double l1 = Double.parseDouble(locationInfo[2]);
+                    Double l2 = Double.parseDouble(locationInfo[3]);
+                    Double accuracy = Double.parseDouble(locationInfo[4]);
+                    Double speed = Double.parseDouble(locationInfo[5]);
+                    LatLng center  = new LatLng(l1, l2);
+                    clearMaker();
+                    mMarker = mMap.addMarker( new MarkerOptions().position(center).draggable(false));
+                    int mFillColor;
+                    String provider = locationInfo[0].toLowerCase();
 
-                // Color (Hub, Saturation, Brightness):
-                //      0,1,1 - Red
-                //      32,1,1 - Orange
-                //      100,1,1 - Green
+                    // Color (Hub, Saturation, Brightness):
+                    //      0,1,1 - Red
+                    //      32,1,1 - Orange
+                    //      100,1,1 - Green
 
-                switch (provider) {
-                    case "gps":
-                        mFillColor = Color.HSVToColor(0x3F, new float[]{100, 1, 1});
-                        break;
-                    case "network":
-                        mFillColor = Color.HSVToColor(0x3F, new float[]{0, 1, 1});
-                        break;
-                    default:
-                        // default fused
-                        mFillColor = Color.HSVToColor(0x3F, new float[]{32, 1, 1});
-                        break;
+                    switch (provider) {
+                        case "gps":
+                            mFillColor = Color.HSVToColor(0x3F, new float[]{100, 1, 1});
+                            break;
+                        case "network":
+                            mFillColor = Color.HSVToColor(0x3F, new float[]{0, 1, 1});
+                            break;
+                        default:
+                            // default fused
+                            mFillColor = Color.HSVToColor(0x3F, new float[]{32, 1, 1});
+                            break;
+                    }
+
+                    mCircle = mMap.addCircle( new CircleOptions().center(center).radius(accuracy).strokeWidth(5).fillColor(mFillColor));
+                    CameraPosition currentCameraPosition = mMap.getCameraPosition();
+                    CameraPosition cameraPosition = new CameraPosition.Builder(currentCameraPosition).target(center).zoom(15).build();
+                    mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+                    @SuppressLint("DefaultLocale")
+                    String sFindLocation = String.format("%s > %.2fm (%s)", locationInfo[1], speed, locationInfo[0]);
+                    mFindLocationView.setText(sFindLocation);
+                } else if ((version >= 1.2) && (locationInfo.length > 2)){
+                    String sFindLocation = String.format("%s > %s : %s", locationInfo[0], locationInfo[1], locationInfo[2]);
+                    mFindLocationView.setText(sFindLocation);
                 }
-
-                mCircle = mMap.addCircle( new CircleOptions().center(center).radius(accuracy).strokeWidth(5).fillColor(mFillColor));
-                CameraPosition currentCameraPosition = mMap.getCameraPosition();
-                CameraPosition cameraPosition = new CameraPosition.Builder(currentCameraPosition).target(center).zoom(15).build();
-                mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
-                @SuppressLint("DefaultLocale")
-                String sFindLocation = String.format("%s > %.2fm (%s)", locationInfo[1], speed, locationInfo[0]);
+            } else {
+                String sFindLocation = String.format("%s > ERR: %s", format.format(Calendar.getInstance()), msgBody);
                 mFindLocationView.setText(sFindLocation);
-
             }
         } catch (Exception e) {
-            // nothing can do
+            String sFindLocation = String.format("%s > %s : ERR", format.format(Calendar.getInstance()), msgBody);
+            mFindLocationView.setText(sFindLocation);
         }
 
     }
